@@ -47,6 +47,7 @@ def RowCheckbox(sample: utils.SampleData) -> str:
         type="checkbox",
         cls=SELECT_ROW_CHECKBOX_CLS,
         sample_id=sample.id,
+        **{'data-has-masks': 'true' if sample.has_masks else 'false'}
     )
 
 
@@ -183,7 +184,7 @@ def SelectionButtons() -> str:
         lib.Button(
             xlib.On(
                 event="click",
-                code=f"selectCheckboxesAction(true, '{SELECT_ROW_CHECKBOX_CLS}')",
+                code=f"selectCheckboxesAction(true, '{SELECT_ROW_CHECKBOX_CLS}'); updateBatchPlotButtonState();",
             ),
             "Select all",
             cls="pico-color-purple-350 mx-1",
@@ -191,7 +192,7 @@ def SelectionButtons() -> str:
         lib.Button(
             xlib.On(
                 event="click",
-                code=f"selectCheckboxesAction(false, '{SELECT_ROW_CHECKBOX_CLS}')",
+                code=f"selectCheckboxesAction(false, '{SELECT_ROW_CHECKBOX_CLS}'); updateBatchPlotButtonState();",
             ),
             "Deselect all",
             cls="pico-color-purple-350 mx-1",
@@ -204,6 +205,7 @@ def BatchActions(context: dict) -> str:
         {
             "name": "Plot",
             "hx_post": "/plot",
+            "id": "batch-plot-button"
         },
         {
             "name": "Generate masks",
@@ -225,6 +227,7 @@ def BatchActions(context: dict) -> str:
 
     buttons = []
     for action in batch_actions:
+        button_id = action.pop("id", None)
         buttons.append(
             lib.Button(
                 action["name"],
@@ -234,6 +237,7 @@ def BatchActions(context: dict) -> str:
                 hx_target=f"#{HOME_ID}",
                 hx_swap="innerHTML",
                 hx_indicator="#batch-actions #loader",
+                id=button_id,
             )
         )
 
@@ -266,4 +270,5 @@ def Home(context={}) -> str:
         lib.Title("RPE Segmentation"),
         lib.Main(Content(context), cls="container"),
         lib.Footer(lib.P("© Noga Shemer 2024"), cls="container"),
+        lib.Script(src="/gui/static/js/disableBatchPlot.js"),
     )
